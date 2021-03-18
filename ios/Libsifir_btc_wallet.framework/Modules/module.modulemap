@@ -1,0 +1,4 @@
+framework module "Libsifir_btc_wallet" {
+    header "Libsifir_btc_wallet.h"
+    export *
+}

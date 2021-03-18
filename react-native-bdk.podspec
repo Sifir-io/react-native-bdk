@@ -10,10 +10,10 @@ Pod::Spec.new do |s|
   s.license      = package["license"]
   s.authors      = package["author"]
 
-  s.platforms    = { :ios => "10.0" }
-  s.source       = { :git => "https://github.com/gabidi/react-native-bdk.git", :tag => "#{s.version}" }
-
-  s.source_files = "ios/**/*.{h,m,mm,swift}"
-
-  s.dependency "React-Core"
+  s.platforms    = { :ios => "11.1" }
+  s.source       = { :git => "https://github.com/Sifir-io/react-native-bdk.git", :tag => "#{s.version}" }
+  s.swift_version = '5.0'
+  s.source_files = "ios/*.{h,m,mm,swift}"
+  s.ios.vendored_frameworks= "ios/Libsifir_btc_wallet.framework"
+  s.dependency "React"
 end
