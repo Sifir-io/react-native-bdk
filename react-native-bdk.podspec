@@ -16,4 +16,5 @@ Pod::Spec.new do |s|
   s.source_files = "ios/*.{h,m,mm,swift}"
   s.ios.vendored_frameworks= "ios/Libsifir_btc_wallet.framework"
   s.dependency "React"
+  s.pod_target_xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => ['$(inherited)','BTC_WALLET'] }
 end

@@ -2,8 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-
-typedef struct ElectrumSledWallet ElectrumSledWallet_t;
+#include "./sifir-types.h"
 
 typedef enum ResultMessage_Tag {
   Success,
@@ -19,6 +18,15 @@ typedef struct ResultMessage {
   };
 } ResultMessage;
 
+typedef struct BoxedResult_OwnedTorService {
+  OwnedTorService *result;
+  struct ResultMessage message;
+} BoxedResult_OwnedTorService;
+
+typedef struct BoxedResult_TcpSocksStream {
+  TcpSocksStream *result;
+  struct ResultMessage message;
+} BoxedResult_TcpSocksStream;
 
 #if defined(TOR_DAEMON)
 typedef struct Observer {
@@ -34,7 +42,7 @@ typedef struct BoxedResult_____c_char {
 } BoxedResult_____c_char;
 
 typedef struct BoxedResult_ElectrumSledWallet {
-  ElectrumSledWallet_t *result;
+  ElectrumSledWallet *result;
   struct ResultMessage message;
 } BoxedResult_ElectrumSledWallet;
 
@@ -114,26 +122,51 @@ void destroy_cstr(char *c_str);
 void shutdown_owned_TorService(OwnedTorService *owned_client);
 #endif
 
+#if defined(BTC_WALLET)
 struct BoxedResult_____c_char *derive_xprvs(const char *network,
                                             const char *derive_path,
                                             const char *password,
                                             const char *seed_phrase,
                                             uintptr_t num_child);
+#endif
 
+#if defined(BTC_WALLET)
 struct BoxedResult_____c_char *descriptors_from_xprvs_wpaths_vec(const char *vec_xprvs_with_paths_json,
                                                                  const char *network);
+#endif
 
+#if defined(BTC_WALLET)
 struct BoxedResult_ElectrumSledWallet *electrum_wallet_from_wallet_cfg(const char *wallet_cfg_json);
+#endif
 
-struct BoxedResult_u64 *get_electrum_wallet_balance(ElectrumSledWallet_t *electrum_wallet);
+#if defined(BTC_WALLET)
+struct BoxedResult_u64 *get_electrum_wallet_balance(ElectrumSledWallet *electrum_wallet);
+#endif
 
-struct BoxedResult_____c_char *get_electrum_wallet_new_address(ElectrumSledWallet_t *electrum_wallet);
+#if defined(BTC_WALLET)
+struct BoxedResult_____c_char *get_electrum_wallet_new_address(ElectrumSledWallet *electrum_wallet);
+#endif
 
-struct BoxedResult_bool *sync_electrum_wallet(ElectrumSledWallet_t *electrum_wallet,
+#if defined(BTC_WALLET)
+struct BoxedResult_bool *sync_electrum_wallet(ElectrumSledWallet *electrum_wallet,
                                               uint32_t max_address_count);
+#endif
 
+#if defined(BTC_WALLET)
+/**
+ * Generates a finalized txn from CreateTxn json
+ */
+struct BoxedResult_____c_char *create_tx(ElectrumSledWallet *wallet, const char *tx);
+#endif
+
+#if defined(BTC_WALLET)
 /**
  *# Safety
  * Destroy a cstr
  */
 void destroy_cstr(char *c_str);
+#endif
+
+#if defined(BTC_WALLET)
+void drop_wallet(ElectrumSledWallet *wallet);
+#endif
