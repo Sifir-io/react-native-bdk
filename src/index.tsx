@@ -12,12 +12,18 @@ type BdkType = {
     xprvs_wpaths_vec_json_str: string,
     network: Network
   ): Promise<string>;
+  get_wallet_desc_from_multi_sig_conf(multi_sig_cfg: String): Promise<string>;
+  xpubsWPaths_from_xprvsWithPaths(
+    xprvWithPaths: String,
+    network: String
+  ): Promise<string>;
   electrum_wallet_from_cfg(wallet_cfg_json: string): Promise<boolean>;
   get_new_wallet_address(param: string): Promise<string>;
   get_wallet_balance(param: string): Promise<number>;
 };
 
 type ExtendedPrivKey = string;
+type ExtendedPubKey = string;
 type DerivationPath = string;
 type Fingerprint = string;
 type Descriptor = string;
@@ -40,11 +46,26 @@ export interface WalletCfg {
 }
 
 export type XprvsWithPaths = [ExtendedPrivKey, DerivationPath, Fingerprint];
+export type XpubsWithPaths = [ExtendedPubKey, DerivationPath, Fingerprint];
 
 export interface DerivedBip39Xprvs {
   phrase: String;
   master_xprv: ExtendedPrivKey;
   xprv_w_paths: XprvsWithPaths[];
+}
+
+export interface MultiSigXpub {
+  Xpub: XpubsWithPaths;
+}
+export interface MultiSigXprv {
+  Xprv: XprvsWithPaths;
+}
+type MultiSigKey = MultiSigXpub | MultiSigXprv;
+
+export interface MultiSigCfg {
+  descriptors: MultiSigKey[];
+  network: Network;
+  quorom: number;
 }
 
 interface BDKNativeModule extends NativeModulesStatic {
@@ -104,12 +125,33 @@ const bdk = () => {
     }
     return await Bdk.get_wallet_balance(param);
   };
+  const getXpubsWPathsFromXprvsWithPaths = async (
+    xprvWithPaths: XprvsWithPaths,
+    network: Network
+  ): Promise<XprvsWithPaths> => {
+    const xprvsWithPathsJson = JSON.stringify(xprvWithPaths);
+    const desc: string = await Bdk.xpubsWPaths_from_xprvsWithPaths(
+      xprvsWithPathsJson,
+      network
+    );
+    console.error('puibsss', desc);
+    return JSON.parse(desc);
+  };
+  const getWalletDescriptorsFromMultiSigConf = async (
+    multiSigConf: MultiSigCfg
+  ): Promise<WalletDescriptors> => {
+    const json = JSON.stringify(multiSigConf);
+    const desc: string = await Bdk.get_wallet_desc_from_multi_sig_conf(json);
+    return JSON.parse(desc);
+  };
   return {
     getElectrumWalletFromCfg,
     getWalletDescriptorsFromXprvPaths,
+    getXpubsWPathsFromXprvsWithPaths,
     genXprvs,
     getNewWalletAddress,
     getWalletBalance,
+    getWalletDescriptorsFromMultiSigConf,
   };
 };
 

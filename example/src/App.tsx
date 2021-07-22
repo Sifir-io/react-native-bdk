@@ -5,14 +5,19 @@ import Bdk, {
   Network,
   DerivedBip39Xprvs,
   WalletDescriptors,
-  WalletCfg,
+  // WalletCfg,
+  // XprvsWithPaths,
+  MultiSigCfg,
+  XpubsWithPaths,
 } from 'react-native-bdk';
 
 const bdk = Bdk();
 export default function App() {
   const [xPrvs, setXPrvs] = React.useState<DerivedBip39Xprvs>();
   const [walletDesc, setWalletDesc] = React.useState<WalletDescriptors>();
-  const [isWalletInit, setIsWalletInit] = React.useState<boolean>(false);
+  const [xpubs, setXpubs] = React.useState<XpubsWithPaths[]>([]);
+  const [isWalletInit] = React.useState<boolean>(false);
+  // const [isWalletInit, setIsWalletInit] = React.useState<boolean>(false);
   const [address, setAddress] = React.useState<string>('');
   const [balance, setBalance] = React.useState<number>(0);
 
@@ -25,24 +30,52 @@ export default function App() {
   useEffect(() => {
     if (!xPrvs) return;
     bdk
-      .getWalletDescriptorsFromXprvPaths(xPrvs.xprv_w_paths, Network.Mainnet)
-      .then((desc) => setWalletDesc(desc));
+      .getXpubsWPathsFromXprvsWithPaths(xPrvs.xprv_w_paths[0], Network.Mainnet)
+      .then((xpub) => setXpubs((prev) => [...prev, xpub]));
   }, [xPrvs]);
 
+  // Single sig
+  //useEffect(() => {
+  //  if (!xPrvs) return;
+  //  bdk
+  //    .getWalletDescriptorsFromXprvPaths(xPrvs.xprv_w_paths, Network.Mainnet)
+  //    .then((desc) => setWalletDesc(desc));
+  //}, [xPrvs]);
+  //
+  // multi Sig
+  // FIXME here
+  // - make wallet from multi sig to test
+  // - create txn + broadcast fn in lib
   useEffect(() => {
-    if (!walletDesc) return;
-    const walletCfg: WalletCfg = {
-      name: 'examplewallet333358',
-      descriptors: walletDesc,
-      db_path: '%%%?%%%',
-      address_look_ahead: 0,
+    if (!xPrvs || !xpubs) return;
+    let cfg: MultiSigCfg = {
+      descriptors: [
+        ...xpubs.map((pub) => ({ Xpub: pub })),
+        ...xPrvs.xprv_w_paths.map((prv) => ({ Xprv: prv })),
+      ],
+      network: Network.Mainnet,
+      quorom: 2,
     };
     bdk
-      .getElectrumWalletFromCfg(walletCfg)
-      .then((desc) => setIsWalletInit(desc));
-  }, [walletDesc]);
+      .getWalletDescriptorsFromMultiSigConf(cfg)
+      .then((desc) => setWalletDesc(desc));
+  }, [xPrvs, xpubs]);
+
+  //useEffect(() => {
+  //  if (!walletDesc) return;
+  //  const walletCfg: WalletCfg = {
+  //    name: 'examplewallet333358',
+  //    descriptors: walletDesc,
+  //    db_path: '%%%?%%%',
+  //    address_look_ahead: 0,
+  //  };
+  //  bdk
+  //    .getElectrumWalletFromCfg(walletCfg)
+  //    .then((desc) => setIsWalletInit(desc));
+  //}, [walletDesc]);
 
   useEffect(() => {
+    if (!isWalletInit) return;
     bdk.getNewWalletAddress('TODO:someJsonCfg').then(setAddress);
     bdk.getWalletBalance('TODO:someJsonCfg').then(setBalance);
   }, [isWalletInit]);
@@ -50,6 +83,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>Xprvs: {JSON.stringify(xPrvs)}</Text>
+      <Text>XPubs: {JSON.stringify(xpubs)}</Text>
       <Text>Wallet Desc: {JSON.stringify(walletDesc)}</Text>
       <Text>Wallet is {`${isWalletInit ? 'Ready' : 'Syncing..'}`}</Text>
       {!!isWalletInit && <Text>{balance}</Text>}

@@ -29,4 +29,13 @@ RCT_EXTERN_METHOD(get_wallet_balance:(NSString*)param
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(get_wallet_desc_from_multi_sig_conf:(NSString*)multi_sig_cfg
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(xpubsWPaths_from_xprvsWithPaths:(NSString*)xprvWithPaths
+                  network:(NSString*)network
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
 @end

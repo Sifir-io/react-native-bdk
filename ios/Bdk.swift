@@ -46,6 +46,31 @@ class Bdk: NSObject {
         }
     }
     
+    @objc(xpubsWPaths_from_xprvsWithPaths:network:withResolver:withRejecter:)
+    func xpubsWPaths_from_xprvsWithPaths(xprvWithPaths:String,network:String,resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock){
+        let xpubsResult = Libsifir_btc_wallet.xprvs_w_paths_to_xpubs_w_paths(xprvWithPaths, network).pointee;
+        let result = SwiftResult.init(call_result: xpubsResult.message);
+        if result.hasResult {
+            let xpubs = String.init(cString: xpubsResult.result.pointee!)
+            resolve(xpubs);
+        } else {
+            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
+        }
+        
+    }
+    @objc(get_wallet_desc_from_multi_sig_conf:withResolver:withRejecter:)
+    func get_wallet_desc_from_multi_sig_conf(multi_sig_cfg:String,resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock){
+        let descriptorsResult = Libsifir_btc_wallet.descriptors_from_multi_sig_conf(multi_sig_cfg).pointee;
+        let result = SwiftResult.init(call_result: descriptorsResult.message);
+        if result.hasResult {
+            let descriptors = String.init(cString: descriptorsResult.result.pointee!)
+            resolve(descriptors);
+        } else {
+            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
+        }
+    }
+    
+    
     @objc(electrum_wallet_from_cfg:withResolver:withRejecter:)
     func electrum_wallet_from_cfg(wallet_cfg_json:String, resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
         let temporaryDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(),isDirectory: true)
@@ -97,6 +122,8 @@ class Bdk: NSObject {
             reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
         }
     }
+    
+    
     
     
 }

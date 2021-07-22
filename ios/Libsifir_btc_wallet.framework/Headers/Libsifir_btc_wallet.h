@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "./sifir-types.h"
+#include "./sifir-typedef.h"
 
 typedef enum ResultMessage_Tag {
   Success,
@@ -41,6 +41,11 @@ typedef struct BoxedResult_____c_char {
   struct ResultMessage message;
 } BoxedResult_____c_char;
 
+typedef struct BoxedResult_HiddenServiceHandler {
+  HiddenServiceHandler *result;
+  struct ResultMessage message;
+} BoxedResult_HiddenServiceHandler;
+
 typedef struct BoxedResult_ElectrumSledWallet {
   ElectrumSledWallet *result;
   struct ResultMessage message;
@@ -55,6 +60,19 @@ typedef struct BoxedResult_bool {
   bool *result;
   struct ResultMessage message;
 } BoxedResult_bool;
+
+/**
+ *# Safety
+ * Destroy a cstr
+ */
+void destroy_cstr(char *c_str);
+
+#if defined(TOR_DAEMON)
+/**
+ * Starts env logger
+ */
+void start_logger(void);
+#endif
 
 #if defined(TOR_DAEMON)
 struct BoxedResult_OwnedTorService *get_owned_TorService(const char *data_dir,
@@ -85,7 +103,7 @@ struct BoxedResult_TcpSocksStream *tcp_stream_start(const char *target,
  *# Safety
  * Send a Message over a tcpStream
  */
-struct ResultMessage *tcp_stream_on_data(TcpSocksStream *stream, struct Observer observer);
+struct ResultMessage *tcp_stream_on_data(TcpSocksStream *stream_ptr, struct Observer observer);
 #endif
 
 #if defined(TOR_DAEMON)
@@ -93,9 +111,37 @@ struct ResultMessage *tcp_stream_on_data(TcpSocksStream *stream, struct Observer
  *# Safety
  * Send a Message over a tcpStream
  */
-struct ResultMessage *tcp_stream_send_msg(TcpSocksStream *stream,
+struct ResultMessage *tcp_stream_send_msg(TcpSocksStream *stream_ptr,
                                           const char *msg,
                                           uint64_t timeout);
+#endif
+
+#if defined(TOR_DAEMON)
+/**
+ *# Safety
+ * Creates a Hidden service returning it's secret/public key
+ */
+struct BoxedResult_____c_char *create_hidden_service(OwnedTorService *owned_client,
+                                                     uint16_t dst_port,
+                                                     uint16_t hs_port,
+                                                     const char *secret_key);
+#endif
+
+#if defined(TOR_DAEMON)
+/**
+ *# Safety
+ * Deletes a Hidden service
+ */
+struct ResultMessage *delete_hidden_service(OwnedTorService *owned_client, const char *onion);
+#endif
+
+#if defined(TOR_DAEMON)
+/**
+ *# Safety
+ * Starts an HTTP request server on dst_port calling the observer with data
+ */
+struct BoxedResult_HiddenServiceHandler *start_http_hidden_service_handler(uint16_t dst_port,
+                                                                           struct Observer observer);
 #endif
 
 #if defined(TOR_DAEMON)
@@ -109,17 +155,17 @@ void tcp_stream_destroy(TcpSocksStream *stream);
 #if defined(TOR_DAEMON)
 /**
  *# Safety
- * Destroy a cstr
+ * Destroy and release ownedTorBox which will shut down owned connection and shutdown daemon
  */
-void destroy_cstr(char *c_str);
+void shutdown_owned_TorService(OwnedTorService *owned_client);
 #endif
 
 #if defined(TOR_DAEMON)
 /**
  *# Safety
- * Destroy and release ownedTorBox which will shut down owned connection and shutdown daemon
+ * Destroy and release HiddenServiceHandler
  */
-void shutdown_owned_TorService(OwnedTorService *owned_client);
+void destroy_hidden_service_handler(HiddenServiceHandler *hs_handler);
 #endif
 
 #if defined(BTC_WALLET)
@@ -155,16 +201,59 @@ struct BoxedResult_bool *sync_electrum_wallet(ElectrumSledWallet *electrum_walle
 #if defined(BTC_WALLET)
 /**
  * Generates a finalized txn from CreateTxn json
+ * returns json { psbt: base64, txnDetails: string }
  */
 struct BoxedResult_____c_char *create_tx(ElectrumSledWallet *wallet, const char *tx);
 #endif
 
 #if defined(BTC_WALLET)
 /**
- *# Safety
- * Destroy a cstr
+ * Turns json of multi_sig_confg into WalletDescriptors JSON that be used with wallet_cfg and electrum_wallet_from_wallet_cfg
+ *  MultiSigConf shouldb passed as json:
+ *{
+ *  "descriptors": [
+ *    {
+ *      "Xprv": [
+ *        "tprv8hb2jMkXPyzimyaTaQ9tTH2xj7CcQENS3uMdNptCyGmDgSbFA2q7Zfpyjs3kf96Ecmascxp2bRg1ztSXGGY3jhzT1N5chXgHUcRwWAAh7kY",
+ *        "m/0",
+ *        "ff31a959"
+ *      ]
+ *    },
+ *    {
+ *      "Xpub": [
+ *        "tpubDFSuJXy4vxC6vX3o1yNZjmdR7T7qS2FgbtqhHSvjNMjyXLHNJk9XzTqCPbVrbevbYyasY6wnS96s5Er4xkNosm3pcuyFH9LUxPUavJ2EZSC",
+ *        "m/44'/0'/0'/0",
+ *        "77306a4c"
+ *      ]
+ *    },
+ *    {
+ *      "Xpub": [
+ *        "tpubDEYM383BbDXgPSpGmBWcdDCDo5HbREUBPVeUuyypBXpyQsMGykfGA2AURtuHbaN7ktrcbyct665m6VbtyQKsQD17Vp7yavVwdyGQ87659RR",
+ *        "m/44'/0'/0'/0",
+ *        "d22d870c"
+ *      ]
+ *    }
+ *  ],
+ *  "network": "testnet",
+ *  "quorom": 2
+ *}
+ *
  */
-void destroy_cstr(char *c_str);
+struct BoxedResult_____c_char *descriptors_from_multi_sig_conf(const char *mutli_sig_conf_json);
+#endif
+
+#if defined(BTC_WALLET)
+struct BoxedResult_____c_char *sign_psbt(ElectrumSledWallet *electrum_wallet,
+                                         const char *psbt_base64);
+#endif
+
+#if defined(BTC_WALLET)
+/**
+ * TODO broadcast_pbst(base64 pbst) -> txnid
+ * Convert XprvsWithPaths to XpubsWithPaths
+ */
+struct BoxedResult_____c_char *xprvs_w_paths_to_xpubs_w_paths(const char *vec_xprvs_with_paths_json,
+                                                              const char *network);
 #endif
 
 #if defined(BTC_WALLET)
