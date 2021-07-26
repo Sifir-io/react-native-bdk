@@ -62,17 +62,15 @@ typedef struct BoxedResult_bool {
 } BoxedResult_bool;
 
 /**
+ * Starts env logger
+ */
+void start_logger(void);
+
+/**
  *# Safety
  * Destroy a cstr
  */
 void destroy_cstr(char *c_str);
-
-#if defined(TOR_DAEMON)
-/**
- * Starts env logger
- */
-void start_logger(void);
-#endif
 
 #if defined(TOR_DAEMON)
 struct BoxedResult_OwnedTorService *get_owned_TorService(const char *data_dir,
@@ -248,8 +246,12 @@ struct BoxedResult_____c_char *sign_psbt(ElectrumSledWallet *electrum_wallet,
 #endif
 
 #if defined(BTC_WALLET)
+struct BoxedResult_____c_char *broadcast_pbst(ElectrumSledWallet *electrum_wallet,
+                                              const char *psbt_base64);
+#endif
+
+#if defined(BTC_WALLET)
 /**
- * TODO broadcast_pbst(base64 pbst) -> txnid
  * Convert XprvsWithPaths to XpubsWithPaths
  */
 struct BoxedResult_____c_char *xprvs_w_paths_to_xpubs_w_paths(const char *vec_xprvs_with_paths_json,
@@ -258,4 +260,12 @@ struct BoxedResult_____c_char *xprvs_w_paths_to_xpubs_w_paths(const char *vec_xp
 
 #if defined(BTC_WALLET)
 void drop_wallet(ElectrumSledWallet *wallet);
+#endif
+
+#if defined(BTC_WALLET)
+/**
+ *# Safety
+ * deserialize consenus encoded base64 PSBT string
+ */
+struct BoxedResult_____c_char *consensus_b64_psbt_to_json_string(const char *psbt);
 #endif

@@ -38,4 +38,31 @@ RCT_EXTERN_METHOD(xpubsWPaths_from_xprvsWithPaths:(NSString*)xprvWithPaths
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(shutdown_wallet:(NSString*)(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+
+RCT_EXTERN_METHOD(create_txn:(NSString*)txn
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+
+RCT_EXTERN_METHOD(wallet_sync:(NSString*)forward
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+
+RCT_EXTERN_METHOD(wallet_sign_psbt:(NSString*)b64Psbt
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(wallet_brodcast_psbt:(NSString*)b64Psbt
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(decode_consensus_b4_psbt:(NSString*)b64Psbt
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
 @end
+

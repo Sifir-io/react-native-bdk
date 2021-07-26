@@ -5,7 +5,8 @@
       "react-native-bdk": ["./src/index"]
     },
     "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
+    /* TODO renable this before prod */
+    "allowUnusedLabels": true,
     "esModuleInterop": true,
     "importsNotUsedAsValues": "error",
     "forceConsistentCasingInFileNames": true,
@@ -17,8 +18,10 @@
     "noImplicitReturns": true,
     "noImplicitUseStrict": false,
     "noStrictGenericChecks": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    /* TODO renable this before prod */
+    "noUnusedLocals": false,
+    /* TODO renable this before prod */
+    "noUnusedParameters": false,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,

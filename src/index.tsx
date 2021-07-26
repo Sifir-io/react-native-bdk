@@ -20,6 +20,11 @@ type BdkType = {
   electrum_wallet_from_cfg(wallet_cfg_json: string): Promise<boolean>;
   get_new_wallet_address(param: string): Promise<string>;
   get_wallet_balance(param: string): Promise<number>;
+  create_txn(txn: string): Promise<string>;
+  wallet_sync(forward: string): Promise<boolean>;
+  wallet_sign_psbt(b64Psbt: string): Promise<string>;
+  wallet_brodcast_psbt(b64Psbt: string): Promise<string>;
+  decode_consensus_b4_psbt(b64Psbt: string): Promise<string>;
 };
 
 type ExtendedPrivKey = string;
@@ -43,6 +48,7 @@ export interface WalletCfg {
   descriptors: WalletDescriptors;
   address_look_ahead: number;
   db_path?: string;
+  server_uri: string | null;
 }
 
 export type XprvsWithPaths = [ExtendedPrivKey, DerivationPath, Fingerprint];
@@ -54,6 +60,8 @@ export interface DerivedBip39Xprvs {
   xprv_w_paths: XprvsWithPaths[];
 }
 
+// MultiSig
+//
 export interface MultiSigXpub {
   Xpub: XpubsWithPaths;
 }
@@ -67,6 +75,66 @@ export interface MultiSigCfg {
   network: Network;
   quorom: number;
 }
+
+// Txns
+//
+export type Address = string;
+export type Amount = number;
+export type TxnRcpt = [Address, Amount];
+export type TxnId = string;
+export enum FeeType {
+  Absolute = 'Abs',
+  Rate = 'Rate',
+}
+export enum SpendChangePolicy {
+  Yes = 'Yes',
+  No = 'No',
+  OnlyChange = 'OnlyChange',
+}
+
+export interface WalletTxn {
+  recipients: TxnRcpt[];
+  fee_type: FeeType;
+  fee: number;
+  spend_change: SpendChangePolicy;
+  enable_rbf: boolean;
+}
+
+// TODO Build this type out from bdk::TransactionDetails
+export interface TxnDetails {
+  transaction?: {
+    version: number;
+    lock_time: number;
+    input: any[];
+    output: any[];
+  };
+  txnId: string;
+  recieved: number;
+  sent: number;
+  fee?: number;
+  confirmation_time?: number;
+  verified?: boolean;
+}
+
+// TODO build this type out from bdk::ParitallySignedTransaction
+export interface Psbt {
+  global: any;
+  inputs: any[];
+  outputs: any[];
+}
+export type Base64String = string;
+
+export type CreateTxnResult = { psbt: Psbt; txnDetails: TxnDetails };
+export type SerializedCreateTxnResult = {
+  psbt: Base64String;
+  txnDetails: TxnDetails;
+};
+
+export type SignPsbtResult = { psbt: Psbt; finished: boolean };
+export type SerializedSignPsbtResult = {
+  psbt: Base64String;
+  finished: boolean;
+};
 
 interface BDKNativeModule extends NativeModulesStatic {
   Bdk: BdkType;
@@ -134,7 +202,6 @@ const bdk = () => {
       xprvsWithPathsJson,
       network
     );
-    console.error('puibsss', desc);
     return JSON.parse(desc);
   };
   const getWalletDescriptorsFromMultiSigConf = async (
@@ -144,6 +211,31 @@ const bdk = () => {
     const desc: string = await Bdk.get_wallet_desc_from_multi_sig_conf(json);
     return JSON.parse(desc);
   };
+
+  const createTxn = async (
+    txn: WalletTxn
+  ): Promise<SerializedCreateTxnResult> => {
+    const txnString = JSON.stringify(txn);
+    const txnResult: string = await Bdk.create_txn(txnString);
+    return JSON.parse(txnResult);
+  };
+  // FIXME base64 derialize psbt to get SignPsbtResult
+  // What kind of serialization is used ? Bytes ?
+  const signPsbt = async (
+    b64Psbt: Base64String
+  ): Promise<SerializedSignPsbtResult> => {
+    const signResult = await Bdk.wallet_sign_psbt(b64Psbt);
+    return JSON.parse(signResult);
+  };
+  const broadcastPsbt = async (b64Psbt: Base64String): Promise<TxnId> => {
+    const txnId = await Bdk.wallet_brodcast_psbt(b64Psbt);
+    return txnId;
+  };
+  const deserPsbt = async (psbtb64: string): Promise<Psbt> => {
+    const psbt = await Bdk.decode_consensus_b4_psbt(psbtb64);
+    console.error(psbt);
+    return JSON.parse(psbt);
+  };
   return {
     getElectrumWalletFromCfg,
     getWalletDescriptorsFromXprvPaths,
@@ -152,6 +244,11 @@ const bdk = () => {
     getNewWalletAddress,
     getWalletBalance,
     getWalletDescriptorsFromMultiSigConf,
+    createTxn,
+    sync: Bdk.wallet_sync,
+    signPsbt,
+    broadcastPsbt,
+    deserPsbt,
   };
 };
 
