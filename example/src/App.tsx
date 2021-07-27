@@ -47,7 +47,7 @@ export default function App() {
   }) => {
     const keys = await bdk.genXprvs(network, derivationPath, password);
     const descriptors = await bdk.getWalletDescriptorsFromXprvPaths(
-      keys.xprv_w_paths,
+      [keys.xprv_w_paths[0], keys.xprv_w_paths[1]],
       network
     );
     setXPrvs(keys);

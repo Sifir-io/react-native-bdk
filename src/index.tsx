@@ -62,17 +62,33 @@ export interface DerivedBip39Xprvs {
 
 // MultiSig
 //
+/**
+ * Public Xpubs, Paths and Fingerprints used in a multisig wallet config
+ */
 export interface MultiSigXpub {
   Xpub: XpubsWithPaths;
 }
+
+/**
+ * Private Xprvs, Paths and Fingerprints used in a multisig wallet config
+ */
 export interface MultiSigXprv {
   Xprv: XprvsWithPaths;
 }
 type MultiSigKey = MultiSigXpub | MultiSigXprv;
 
+/**
+ * Config used to generate a MultiSig Wallet descriptor
+ */
 export interface MultiSigCfg {
+  /**
+   * Array of Xpubs and Xprvs used to generate a multi sig wallet descriptor
+   */
   descriptors: MultiSigKey[];
   network: Network;
+  /**
+   * Minimum quorom required for signing a txn
+   */
   quorom: number;
 }
 
@@ -148,6 +164,16 @@ const { Bdk } = NativeModules as BDKNativeModule;
 const bdk = () => {
   let hasWallet: boolean = false;
 
+  /**
+   * Generates a new BIP39 based seed and derived Xprvs based on the provided Paths.
+   * If "seedWords" are provided they will be used to seed the masterXprv and dervice the xPrvs
+   * @param network
+   * @param devPath The derivation path for the derived Xprvs in a string format ex: "m/44/0'/0'"
+   * @param pass A password to protect the seed
+   * @param seedWords If provided will be used to generate the seed, ie used to restore a Bip39 wallet
+   * @param numchild Number of *normal* (not hardend) children from the derivation path to dervie and return
+   * ex: for a devPath of "m/44/0'/0'" if numChild=2 is provided the returned xPrvs will have paths "m/44/0'/0'/0" and "m/44/0'/0'/1"
+   */
   const genXprvs = async (
     network: Network,
     devPath: DerivationPath,
@@ -164,11 +190,18 @@ const bdk = () => {
     );
     return JSON.parse(xprvs);
   };
+
+  /**
+   * Gens wpkh single sig wallet descriptor based on two Xprvs provided
+   * One will be used as the external and one as the internal desc
+   * @param XprvsWithPathsTuple A tuple with the first entry used as the external descriptor and the second for internal (change)
+   * @param network
+   */
   const getWalletDescriptorsFromXprvPaths = async (
-    xprvsWithPaths: XprvsWithPaths[],
+    XprvsWithPathsTuple: [XprvsWithPaths, XprvsWithPaths],
     network: Network
   ): Promise<WalletDescriptors> => {
-    const xprvsWithPathsJson = JSON.stringify(xprvsWithPaths);
+    const xprvsWithPathsJson = JSON.stringify(XprvsWithPathsTuple);
     const desc: string = await Bdk.descriptors_from_xprvs_wpaths_json(
       xprvsWithPathsJson,
       network
@@ -176,6 +209,10 @@ const bdk = () => {
     return JSON.parse(desc);
   };
 
+  /**
+   * Initialize and electrum wallet based on passed Config
+   * @param walletCfg
+   */
   const getElectrumWalletFromCfg = async (walletCfg: WalletCfg) => {
     if (hasWallet) {
       throw 'Wallet already init, use shutdown';
@@ -197,6 +234,11 @@ const bdk = () => {
     }
     return await Bdk.get_wallet_balance(param);
   };
+  /**
+   * Convert a private XPrvsWithPaths tuple into a public Xpub with paths that can be shared
+   * @param xprvWithPaths
+   * @param network
+   */
   const getXpubsWPathsFromXprvsWithPaths = async (
     xprvWithPaths: XprvsWithPaths,
     network: Network
@@ -208,6 +250,11 @@ const bdk = () => {
     );
     return JSON.parse(desc);
   };
+  /**
+   * Generate a WPKH multisorted descriptor from MultSigConf
+   * FIXME rename this to match what it does
+   * @param multiSigConf
+   */
   const getWalletDescriptorsFromMultiSigConf = async (
     multiSigConf: MultiSigCfg
   ): Promise<WalletDescriptors> => {
@@ -219,6 +266,9 @@ const bdk = () => {
   const createTxn = async (
     txn: WalletTxn
   ): Promise<SerializedCreateTxnResult> => {
+    if (hasWallet) {
+      throw 'Wallet already init, use shutdown';
+    }
     const txnString = JSON.stringify(txn);
     const txnResult: string = await Bdk.create_txn(txnString);
     return JSON.parse(txnResult);
@@ -226,10 +276,16 @@ const bdk = () => {
   const signPsbt = async (
     b64Psbt: SerializedPsbt
   ): Promise<SerializedSignPsbtResult> => {
+    if (hasWallet) {
+      throw 'Wallet already init, use shutdown';
+    }
     const signResult = await Bdk.wallet_sign_psbt(b64Psbt);
     return JSON.parse(signResult);
   };
   const broadcastPsbt = async (b64Psbt: SerializedPsbt): Promise<TxnId> => {
+    if (hasWallet) {
+      throw 'Wallet already init, use shutdown';
+    }
     const txnId = await Bdk.wallet_brodcast_psbt(b64Psbt);
     return txnId;
   };
