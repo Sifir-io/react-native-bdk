@@ -14,7 +14,7 @@ import Bdk, {
   WalletTxn,
   // Psbt,
   TxnDetails,
-  Base64String,
+  SerializedPsbt,
 } from 'react-native-bdk';
 
 const bdk = Bdk();
@@ -29,7 +29,7 @@ export default function App() {
   const [balance, setBalance] = React.useState<number>(0);
   // txn
   const [txnDetails, setTxnDetails] = React.useState<TxnDetails>();
-  const [psbt, setPsbt] = React.useState<Base64String>();
+  const [psbt, setPsbt] = React.useState<SerializedPsbt>();
   //
   const [isFinalizedPsbt, setIsFinalizedPsbt] = React.useState<boolean>(false);
   // ref

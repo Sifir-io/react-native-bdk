@@ -122,17 +122,21 @@ export interface Psbt {
   inputs: any[];
   outputs: any[];
 }
-export type Base64String = string;
+
+/**
+ * Consesus serialized and base64 encoded PSBT
+ */
+export type SerializedPsbt = string;
 
 export type CreateTxnResult = { psbt: Psbt; txnDetails: TxnDetails };
 export type SerializedCreateTxnResult = {
-  psbt: Base64String;
+  psbt: SerializedPsbt;
   txnDetails: TxnDetails;
 };
 
 export type SignPsbtResult = { psbt: Psbt; finished: boolean };
 export type SerializedSignPsbtResult = {
-  psbt: Base64String;
+  psbt: SerializedPsbt;
   finished: boolean;
 };
 
@@ -219,19 +223,17 @@ const bdk = () => {
     const txnResult: string = await Bdk.create_txn(txnString);
     return JSON.parse(txnResult);
   };
-  // FIXME base64 derialize psbt to get SignPsbtResult
-  // What kind of serialization is used ? Bytes ?
   const signPsbt = async (
-    b64Psbt: Base64String
+    b64Psbt: SerializedPsbt
   ): Promise<SerializedSignPsbtResult> => {
     const signResult = await Bdk.wallet_sign_psbt(b64Psbt);
     return JSON.parse(signResult);
   };
-  const broadcastPsbt = async (b64Psbt: Base64String): Promise<TxnId> => {
+  const broadcastPsbt = async (b64Psbt: SerializedPsbt): Promise<TxnId> => {
     const txnId = await Bdk.wallet_brodcast_psbt(b64Psbt);
     return txnId;
   };
-  const deserPsbt = async (psbtb64: string): Promise<Psbt> => {
+  const deserPsbt = async (psbtb64: SerializedPsbt): Promise<Psbt> => {
     const psbt = await Bdk.decode_consensus_b4_psbt(psbtb64);
     console.error(psbt);
     return JSON.parse(psbt);
