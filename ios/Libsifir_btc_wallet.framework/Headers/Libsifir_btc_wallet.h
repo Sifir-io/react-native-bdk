@@ -187,7 +187,14 @@ struct BoxedResult_u64 *get_electrum_wallet_balance(ElectrumSledWallet *electrum
 #endif
 
 #if defined(BTC_WALLET)
-struct BoxedResult_____c_char *get_electrum_wallet_new_address(ElectrumSledWallet *electrum_wallet);
+/**
+ * Gets an address from the wallet based on the index provided
+ * index = 0 => LastUnused
+ * index = 1 => New
+ * index > 1 => Peek(index)
+ */
+struct BoxedResult_____c_char *get_electrum_wallet_address(ElectrumSledWallet *electrum_wallet,
+                                                           uint32_t index);
 #endif
 
 #if defined(BTC_WALLET)
