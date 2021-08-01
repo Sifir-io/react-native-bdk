@@ -78,14 +78,14 @@ class Bdk: NSObject {
         }
     }
     
-    @objc(get_new_wallet_address:withResolver:withRejecter:)
-    func get_new_wallet_address(param:String,resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
+    @objc(get_wallet_address:withResolver:withRejecter:)
+    func get_wallet_address(index:NSNumber,resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
         guard let wallet = self.electrumWallet else {
             reject("BDK.electrum_wallet","Wallet not init, call electrum_wallet_from_cfg first",NSError.init(domain: "BDK", code: 99));
             return;
         }
         
-        let addressResult = get_electrum_wallet_new_address(wallet).pointee;
+        let addressResult = get_electrum_wallet_address(wallet,UInt32(truncating: index)).pointee;
         let result = SwiftResult.init(call_result: addressResult.message);
         if result.hasResult {
             let address = String.init(cString: addressResult.result.pointee!)

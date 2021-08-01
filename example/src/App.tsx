@@ -96,7 +96,7 @@ export default function App() {
    * Get balance and Address */
   useEffect(() => {
     if (!isWalletInit) return;
-    bdk.getNewWalletAddress('TODO:someJsonCfg').then(setAddress);
+    bdk.getNewWalletAddress().then(setAddress);
     bdk.getWalletBalance('TODO:someJsonCfg').then(setBalance);
 
     if (!syncIntervalRef.current) {

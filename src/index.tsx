@@ -19,7 +19,7 @@ type BdkType = {
     network: String
   ): Promise<string>;
   electrum_wallet_from_cfg(wallet_cfg_json: string): Promise<boolean>;
-  get_new_wallet_address(param: string): Promise<string>;
+  get_wallet_address(index: number): Promise<string>;
   get_wallet_balance(param: string): Promise<number>;
   create_txn(txn: string): Promise<string>;
   wallet_sync(forward: string): Promise<boolean>;
@@ -216,11 +216,17 @@ const bdk = () => {
     return hasWallet;
   };
 
-  const getNewWalletAddress = async (param: string) => {
+  const getNewWalletAddress = async () => {
     if (!hasWallet) {
       throw 'Wallet not-init, call getElectrumWalletFromCfg first';
     }
-    return await Bdk.get_new_wallet_address(param);
+    return await Bdk.get_wallet_address(1);
+  };
+  const getLastUsedWalletAddress = async () => {
+    if (!hasWallet) {
+      throw 'Wallet not-init, call getElectrumWalletFromCfg first';
+    }
+    return await Bdk.get_wallet_address(0);
   };
   const getWalletBalance = async (param: string) => {
     if (!hasWallet) {
@@ -310,6 +316,7 @@ const bdk = () => {
     getXpubsWPathsFromXprvsWithPaths,
     genXprvs,
     getNewWalletAddress,
+    getLastUsedWalletAddress,
     getWalletBalance,
     getWpkhWalletDescriptorsFromXprvPaths,
     getWshMultiSortedWalletDescriptorsFromMultiSigConf,

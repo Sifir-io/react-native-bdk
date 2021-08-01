@@ -15,7 +15,7 @@ RCT_EXTERN_METHOD(electrum_wallet_from_cfg:(NSString*)wallet_cfg_json
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(get_new_wallet_address:(NSString*)param
+RCT_EXTERN_METHOD(get_wallet_address:(nonnull NSNumber*)index
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
