@@ -46,7 +46,7 @@ export default function App() {
     password: string;
   }) => {
     const keys = await bdk.genXprvs(network, derivationPath, password);
-    const descriptors = await bdk.getWalletDescriptorsFromXprvPaths(
+    const descriptors = await bdk.getWpkhWalletDescriptorsFromXprvPaths(
       [keys.xprv_w_paths[0], keys.xprv_w_paths[1]],
       network
     );
@@ -72,7 +72,7 @@ export default function App() {
       quorom: 2,
     };
     bdk
-      .getWalletDescriptorsFromMultiSigConf(cfg)
+      .getWshMultiSortedWalletDescriptorsFromMultiSigConf(cfg)
       .then((desc) => setWalletDesc(desc));
   };
 

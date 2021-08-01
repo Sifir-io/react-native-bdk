@@ -13,6 +13,7 @@ type BdkType = {
     network: Network
   ): Promise<string>;
   get_wallet_desc_from_multi_sig_conf(multi_sig_cfg: String): Promise<string>;
+  get_wallet_desc_from_any_desc_conf(desc_conf: String): Promise<string>;
   xpubsWPaths_from_xprvsWithPaths(
     xprvWithPaths: String,
     network: String
@@ -91,6 +92,17 @@ export interface MultiSigCfg {
    */
   quorom: number;
 }
+// Wallet Descriptor Cfgs
+// Possible configurations we can send down to create wallet descriptors of our choise
+
+interface WpkhDescCfg {
+  Wpkh: [[XprvsWithPaths, XprvsWithPaths], Network];
+}
+interface WshMultiSortedCfg {
+  WshMultiSorted: MultiSigCfg;
+}
+
+type AnyDescriptorCfg = WpkhDescCfg | WshMultiSortedCfg;
 
 // Txns
 //
@@ -192,24 +204,6 @@ const bdk = () => {
   };
 
   /**
-   * Gens wpkh single sig wallet descriptor based on two Xprvs provided
-   * One will be used as the external and one as the internal desc
-   * @param XprvsWithPathsTuple A tuple with the first entry used as the external descriptor and the second for internal (change)
-   * @param network
-   */
-  const getWalletDescriptorsFromXprvPaths = async (
-    XprvsWithPathsTuple: [XprvsWithPaths, XprvsWithPaths],
-    network: Network
-  ): Promise<WalletDescriptors> => {
-    const xprvsWithPathsJson = JSON.stringify(XprvsWithPathsTuple);
-    const desc: string = await Bdk.descriptors_from_xprvs_wpaths_json(
-      xprvsWithPathsJson,
-      network
-    );
-    return JSON.parse(desc);
-  };
-
-  /**
    * Initialize and electrum wallet based on passed Config
    * @param walletCfg
    */
@@ -251,15 +245,32 @@ const bdk = () => {
     return JSON.parse(desc);
   };
   /**
-   * Generate a WPKH multisorted descriptor from MultSigConf
-   * FIXME rename this to match what it does
+   * Generate a WSH multisorted descriptor from MultSigConf
    * @param multiSigConf
    */
-  const getWalletDescriptorsFromMultiSigConf = async (
+  const getWshMultiSortedWalletDescriptorsFromMultiSigConf = async (
     multiSigConf: MultiSigCfg
   ): Promise<WalletDescriptors> => {
-    const json = JSON.stringify(multiSigConf);
-    const desc: string = await Bdk.get_wallet_desc_from_multi_sig_conf(json);
+    const json = JSON.stringify({
+      WshMultiSorted: { ...multiSigConf },
+    } as AnyDescriptorCfg);
+    const desc: string = await Bdk.get_wallet_desc_from_any_desc_conf(json);
+    return JSON.parse(desc);
+  };
+  /**
+   * Gens WPKH single sig wallet descriptor based on two Xprvs provided
+   * One will be used as the external and one as the internal desc
+   * @param XprvsWithPathsTuple A tuple with the first entry used as the external descriptor and the second for internal (change)
+   * @param network
+   */
+  const getWpkhWalletDescriptorsFromXprvPaths = async (
+    XprvsWithPathsTuple: [XprvsWithPaths, XprvsWithPaths],
+    network: Network
+  ): Promise<WalletDescriptors> => {
+    const json = JSON.stringify({
+      Wpkh: [XprvsWithPathsTuple, network],
+    } as AnyDescriptorCfg);
+    const desc: string = await Bdk.get_wallet_desc_from_any_desc_conf(json);
     return JSON.parse(desc);
   };
 
@@ -296,12 +307,12 @@ const bdk = () => {
   };
   return {
     getElectrumWalletFromCfg,
-    getWalletDescriptorsFromXprvPaths,
     getXpubsWPathsFromXprvsWithPaths,
     genXprvs,
     getNewWalletAddress,
     getWalletBalance,
-    getWalletDescriptorsFromMultiSigConf,
+    getWpkhWalletDescriptorsFromXprvPaths,
+    getWshMultiSortedWalletDescriptorsFromMultiSigConf,
     createTxn,
     sync: Bdk.wallet_sync,
     signPsbt,

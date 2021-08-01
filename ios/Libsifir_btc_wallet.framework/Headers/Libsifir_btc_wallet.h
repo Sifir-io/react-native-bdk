@@ -175,8 +175,7 @@ struct BoxedResult_____c_char *derive_xprvs(const char *network,
 #endif
 
 #if defined(BTC_WALLET)
-struct BoxedResult_____c_char *descriptors_from_xprvs_wpaths_vec(const char *vec_xprvs_with_paths_json,
-                                                                 const char *network);
+struct BoxedResult_____c_char *wallet_descriptors_from_any_descriptor_cfg(const char *any_desc_cfg);
 #endif
 
 #if defined(BTC_WALLET)
@@ -202,42 +201,6 @@ struct BoxedResult_bool *sync_electrum_wallet(ElectrumSledWallet *electrum_walle
  * returns json { psbt: base64, txnDetails: string }
  */
 struct BoxedResult_____c_char *create_tx(ElectrumSledWallet *wallet, const char *tx);
-#endif
-
-#if defined(BTC_WALLET)
-/**
- * Turns json of multi_sig_confg into WalletDescriptors JSON that be used with wallet_cfg and electrum_wallet_from_wallet_cfg
- *  MultiSigConf shouldb passed as json:
- *{
- *  "descriptors": [
- *    {
- *      "Xprv": [
- *        "tprv8hb2jMkXPyzimyaTaQ9tTH2xj7CcQENS3uMdNptCyGmDgSbFA2q7Zfpyjs3kf96Ecmascxp2bRg1ztSXGGY3jhzT1N5chXgHUcRwWAAh7kY",
- *        "m/0",
- *        "ff31a959"
- *      ]
- *    },
- *    {
- *      "Xpub": [
- *        "tpubDFSuJXy4vxC6vX3o1yNZjmdR7T7qS2FgbtqhHSvjNMjyXLHNJk9XzTqCPbVrbevbYyasY6wnS96s5Er4xkNosm3pcuyFH9LUxPUavJ2EZSC",
- *        "m/44'/0'/0'/0",
- *        "77306a4c"
- *      ]
- *    },
- *    {
- *      "Xpub": [
- *        "tpubDEYM383BbDXgPSpGmBWcdDCDo5HbREUBPVeUuyypBXpyQsMGykfGA2AURtuHbaN7ktrcbyct665m6VbtyQKsQD17Vp7yavVwdyGQ87659RR",
- *        "m/44'/0'/0'/0",
- *        "d22d870c"
- *      ]
- *    }
- *  ],
- *  "network": "testnet",
- *  "quorom": 2
- *}
- *
- */
-struct BoxedResult_____c_char *descriptors_from_multi_sig_conf(const char *mutli_sig_conf_json);
 #endif
 
 #if defined(BTC_WALLET)

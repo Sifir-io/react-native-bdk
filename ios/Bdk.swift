@@ -30,19 +30,7 @@ class Bdk: NSObject {
             let xprvs = String.init(cString: xprvs.result.pointee!)
             resolve(xprvs);
         } else {
-            reject("BDK.xprvs",result.error,NSError.init(domain: "TOR", code: 99));
-        }
-    }
-    
-    @objc(descriptors_from_xprvs_wpaths_json:network:withResolver:withRejecter:)
-    func descriptors_from_xprvs_wpaths_json (xprvs_wpaths_vec_json_str:String,network:String, resolve:RCTPromiseResolveBlock, reject:RCTPromiseRejectBlock) {
-        let descriptors = descriptors_from_xprvs_wpaths_vec(xprvs_wpaths_vec_json_str,network).pointee;
-        let result = SwiftResult.init(call_result: descriptors.message);
-        if result.hasResult {
-            let descriptors = String.init(cString: descriptors.result.pointee!)
-            resolve(descriptors);
-        } else {
-            reject("BDK.xprvs",result.error,NSError.init(domain: "TOR", code: 99));
+            reject("BDK.xprvs",result.error,NSError.init(domain: "BDK", code: 99));
         }
     }
     
@@ -54,21 +42,23 @@ class Bdk: NSObject {
             let xpubs = String.init(cString: xpubsResult.result.pointee!)
             resolve(xpubs);
         } else {
-            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
+            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "BDK", code: 99));
         }
         
     }
-    @objc(get_wallet_desc_from_multi_sig_conf:withResolver:withRejecter:)
-    func get_wallet_desc_from_multi_sig_conf(multi_sig_cfg:String,resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock){
-        let descriptorsResult = Libsifir_btc_wallet.descriptors_from_multi_sig_conf(multi_sig_cfg).pointee;
+    
+    @objc(get_wallet_desc_from_any_desc_conf:withResolver:withRejecter:)
+    func get_wallet_desc_from_any_desc_conf(desc_cfg:String,resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock){
+        let descriptorsResult = Libsifir_btc_wallet.wallet_descriptors_from_any_descriptor_cfg(desc_cfg).pointee;
         let result = SwiftResult.init(call_result: descriptorsResult.message);
         if result.hasResult {
             let descriptors = String.init(cString: descriptorsResult.result.pointee!)
             resolve(descriptors);
         } else {
-            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
+            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "BDK", code: 99));
         }
     }
+    
     
     
     @objc(electrum_wallet_from_cfg:withResolver:withRejecter:)
@@ -84,7 +74,7 @@ class Bdk: NSObject {
             self.electrumWallet = electrumWallet.result!;
             resolve(true);
         } else {
-            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
+            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "BDK", code: 99));
         }
     }
     
@@ -101,7 +91,7 @@ class Bdk: NSObject {
             let address = String.init(cString: addressResult.result.pointee!)
             resolve(address);
         } else {
-            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
+            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "BDK", code: 99));
         }
     }
     @objc(get_wallet_balance:withResolver:withRejecter:)
@@ -117,7 +107,7 @@ class Bdk: NSObject {
             let balance = addressResult.result.pointee
             resolve(balance);
         } else {
-            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
+            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "BDK", code: 99));
         }
     }
     @objc(shutdown_wallet:withRejecter:)
@@ -142,7 +132,7 @@ class Bdk: NSObject {
             let txn = String.init(cString: createTxnResult.result.pointee!)
             resolve(txn);
         } else {
-            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
+            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "BDK", code: 99));
         }
         
     }
@@ -159,7 +149,7 @@ class Bdk: NSObject {
             let txn = String.init(cString: createTxnResult.result.pointee!)
             resolve(txn);
         } else {
-            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
+            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "BDK", code: 99));
         }
         
     }
@@ -176,7 +166,7 @@ class Bdk: NSObject {
             let txnId = String.init(cString: broadcastResult.result.pointee!)
             resolve(txnId);
         } else {
-            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
+            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "BDK", code: 99));
         }
     }
     
@@ -195,7 +185,7 @@ class Bdk: NSObject {
         if result.hasResult {
             resolve(true);
         } else {
-            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
+            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "BDK", code: 99));
         }
     }
     
@@ -211,7 +201,7 @@ class Bdk: NSObject {
             let payload = String.init(cString: callResult.result.pointee!)
             resolve(payload);
         } else {
-            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "TOR", code: 99));
+            reject("BDK.electrum_wallet",result.error,NSError.init(domain: "BDK", code: 99));
         }
     }
     
