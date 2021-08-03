@@ -12,11 +12,11 @@ type BdkType = {
     xprvs_wpaths_vec_json_str: string,
     network: Network
   ): Promise<string>;
-  get_wallet_desc_from_multi_sig_conf(multi_sig_cfg: String): Promise<string>;
-  get_wallet_desc_from_any_desc_conf(desc_conf: String): Promise<string>;
+  get_wallet_desc_from_multi_sig_conf(multi_sig_cfg: string): Promise<string>;
+  get_wallet_desc_from_any_desc_conf(desc_conf: string): Promise<string>;
   xpubsWPaths_from_xprvsWithPaths(
-    xprvWithPaths: String,
-    network: String
+    xprvWithPaths: string,
+    network: string
   ): Promise<string>;
   electrum_wallet_from_cfg(wallet_cfg_json: string): Promise<boolean>;
   get_wallet_address(index: number): Promise<string>;
@@ -56,7 +56,7 @@ export type XprvsWithPaths = [ExtendedPrivKey, DerivationPath, Fingerprint];
 export type XpubsWithPaths = [ExtendedPubKey, DerivationPath, Fingerprint];
 
 export interface DerivedBip39Xprvs {
-  phrase: String;
+  phrase: string;
   master_xprv: ExtendedPrivKey;
   xprv_w_paths: XprvsWithPaths[];
 }
